@@ -4,11 +4,11 @@ const dbConfig={
     host: 'localhost',
     port: '3306',
     user: 'root',
-    password: '',
-    database: 'uade2024'
+    password: 'Maitena1.',
+    database: 'Uade2024'
 }
 
-const connection =mysql.createConnection(dbConfig)
+const connection = mysql.createConnection(dbConfig)
 
 connection.connect((err)=>{
     if(err){
@@ -18,4 +18,4 @@ connection.connect((err)=>{
     console.log("Connection established")
 })
 
-module.exports =connection
+module.exports = connection

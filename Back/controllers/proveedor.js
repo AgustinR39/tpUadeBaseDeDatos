@@ -1,45 +1,46 @@
 const connection= require ("../connectDB/dBconnection")
 
 function getAllProveedores(req,res){
-    const query = "SELECT * from proveedor"
-
-    connection.query(query,(err,result)=>{
-        if (err){
-            console.error(err)
-            res.status(500).send("Error retrieving notes from database")
-        } else {
-            res.json(result)
+    connection.query('SELECT * FROM proveedor',
+        (err,result)=>{
+            if(err){
+                console.log(err);
+            }else{
+                res.send(result);
+            }
         }
-    })
+        );
 }
 
 function createProveedor(req,res) {
-    const {nombre, cuit} = req.body
-    const query = "INSERT INTO proveedor (nombre, cuit) VALUES (?,?)"
+    const proveedorProducto = req.body.proveedorProducto;
+    const proveedorCuit = req.body.proveedorCuit;
 
-    connection.query(query, [nombre, cuit], (err,result)=>{
-        if (err) {
-            console.error(err)
-            res.status(500).send("Error, couldn't insert notes")
-        } else{
-            res.json(result)
+    connection.query('INSERT INTO proveedor(proveedorProducto,proveedorCuit) VALUES(?,?)',[proveedorProducto, proveedorCuit],
+    (err,result)=>{
+        if(err){
+            console.log(err);
+        }else{
+            res.send(result);
         }
-    })
+    }
+    );
 }
 
 function updateProveedor(req,res) {
-    const proveedorId = req.params.id
-    const {nombre, cuit} = req.body
-    const query = "UPDATE proveedor SET nombre=?, cuit=? WHERE id=?"
+    const id = req.body.id;
+    const proveedorProducto = req.body.proveedorProducto;
+    const proveedorCuit = req.body.proveedorCuit;
 
-    connection.query(query, [nombre, cuit, proveedorId], (err, result) => {
-        if(err) {
-            console.error(err)
-            res.status(500).send("Error, couldn't update notes")
-        } else{
-            res.json(result)
+    connection.query('UPDATE proveedor SET proveedorProducto=?,proveedorCuit=? WHERE id=?',[proveedorProducto,proveedorCuit,id],
+    (err,result)=>{
+        if(err){
+            console.log(err);
+        }else{
+            res.send(result);
         }
-    })
+    }
+    );
 }
 
 function getProveedorById(req,res) {
@@ -50,7 +51,7 @@ function getProveedorById(req,res) {
     connection.query(query, [proveedorId], (err,result)=>{
         if (err) {
             console.error(err)
-            res.status(500),send("Error retrieving note from database")
+            res.status(500),send("Error retrieving proveedor from database")
         }else{
             res.json(result)
         }
@@ -58,18 +59,17 @@ function getProveedorById(req,res) {
 }
 
 function deleteProveedor(req,res) {
-    const proveedorId= req.params.id
+    const id = req.params.id;
 
-    const query= "DELETE FROM proveedor WHERE id=?"
-
-    connection.query(query, [proveedorId], (err, result) => {
+    connection.query('DELETE FROM proveedor WHERE id=?',id,
+    (err,result)=>{
         if(err){
-            console.error(err)
-            res.statust(500).send("Error deleting notes from database")
-        }else {
-            res.json(result)
+            console.log(err);
+        }else{
+            res.send(result);
         }
-    })
+    }
+    );
 }
 
 module.exports ={

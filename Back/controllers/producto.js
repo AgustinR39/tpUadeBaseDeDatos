@@ -1,45 +1,52 @@
 const connection= require ("../connectDB/dBconnection")
 
 function getAllProductos(req,res){
-    const query = "SELECT * from producto"
-
-    connection.query(query,(err,result)=>{
-        if (err){
-            console.error(err)
-            res.status(500).send("Error retrieving notes from database")
-        } else {
-            res.json(result)
+    connection.query('SELECT * FROM producto',
+        (err,result)=>{
+            if(err){
+                console.log(err);
+            }else{
+                res.send(result);
+            }
         }
-    })
+        );
 }
 
 function createProducto(req,res) {
-    const {nombre, nombreComercial,seleccion,precioVenta,proveedor,precioCompra,fotoProducto} = req.body
-    const query = "INSERT INTO producto (nombre, nombreComercial,seleccion,precioVenta,proveedor,precioCompra,fotoProducto) VALUES (?,?,?,?,?,?,?)"
+    const nombreProducto = req.body.nombreProducto;
+    const nombreComercial = req.body.nombreComercial;
+    const precioVenta = req.body.precioVenta;
+    const proveedorProducto = req.body.proveedorProducto;
+    const precioCompra = req.body.precioCompra;
 
-    connection.query(query, [nombre, nombreComercial,seleccion,precioVenta,proveedor,precioCompra,fotoProducto], (err,result)=>{
-        if (err) {
-            console.error(err)
-            res.status(500).send("Error, couldn't insert products")
-        } else{
-            res.json(result)
+    connection.query('INSERT INTO producto(nombreProducto,nombreComercial,precioVenta,proveedorProducto,precioCompra) VALUES(?,?,?,?,?)',[nombreProducto,nombreComercial,precioVenta,proveedorProducto,precioCompra],
+    (err,result)=>{
+        if(err){
+            console.log(err);
+        }else{
+            res.send(result);
         }
-    })
+    }
+    );
 }
 
 function updateProducto(req,res) {
-    const productoId = req.params.id
-    const {nombre, nombreComercial,seleccion,precioVenta,proveedor,precioCompra,fotoProducto} = req.body
-    const query = "UPDATE producto SET nombre=?, nombreComercial=?, seleccion=?, precioVenta=?, proveedor=?, precioCompra=?, fotoProducto=? WHERE id=?"
+    const id = req.body.id;
+    const nombreProducto = req.body.nombreProducto;
+    const nombreComercial = req.body.nombreComercial;
+    const precioVenta = req.body.precioVenta;
+    const proveedorProducto = req.body.proveedorProducto;
+    const precioCompra = req.body.precioCompra;
 
-    connection.query(query, [nombre, nombreComercial,seleccion,precioVenta,proveedor,precioCompra,fotoProducto, productoId], (err, result) => {
-        if(err) {
-            console.error(err)
-            res.status(500).send("Error, couldn't update products")
-        } else{
-            res.json(result)
+    connection.query('UPDATE producto SET nombreProducto=?,nombreComercial=?,precioVenta=?,proveedorProducto=?,precioCompra=? WHERE id=?',[nombreProducto,nombreComercial,precioVenta,proveedorProducto,precioCompra,id],
+    (err,result)=>{
+        if(err){
+            console.log(err);
+        }else{
+            res.send(result);
         }
-    })
+    }
+    );
 }
 
 function getProductoById(req,res) {
@@ -58,18 +65,17 @@ function getProductoById(req,res) {
 }
 
 function deleteProducto(req,res) {
-    const productoId= req.params.id
+    const id = req.params.id;
 
-    const query= "DELETE FROM producto WHERE id=?"
-
-    connection.query(query, [productoId], (err, result) => {
+    connection.query('DELETE FROM producto WHERE id=?',id,
+    (err,result)=>{
         if(err){
-            console.error(err)
-            res.statust(500).send("Error deleting products from database")
-        }else {
-            res.json(result)
+            console.log(err);
+        }else{
+            res.send(result);
         }
-    })
+    }
+    );
 }
 
 module.exports ={

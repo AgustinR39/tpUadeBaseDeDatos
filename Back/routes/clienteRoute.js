@@ -3,10 +3,10 @@ const router = express.Router();
 
 const controller = require('../controllers/cliente');
 
-router.get('/usuarios', controller.getAllClientes)
-router.post('/guardar', controller.createCliente)
-router.put('/modificar-cliente', controller.updateCliente)
-router.get('/usuarios/:id', controller.getClienteById)
-router.delete('/eliminar/:id', controller.deleteCliente)
+router.get('/clientes', controller.getAllClientes)
+router.post('/create', controller.createCliente)
+router.put('/update', controller.updateCliente)
+router.get('/clientes/:id', controller.getClienteById)
+router.delete('/delete/:id', controller.deleteCliente)
 
 module.exports = router;

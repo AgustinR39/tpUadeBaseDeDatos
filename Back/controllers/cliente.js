@@ -1,45 +1,46 @@
 const connection= require ("../connectDB/dBconnection")
 
 function getAllClientes(req,res){
-    const query = "SELECT * from cliente"
-
-    connection.query(query,(err,result)=>{
-        if (err){
-            console.error(err)
-            res.status(500).send("Error retrieving notes from database")
-        } else {
-            res.json(result)
+    connection.query('SELECT * FROM cliente',
+        (err,result)=>{
+            if(err){
+                console.log(err);
+            }else{
+                res.send(result);
+            }
         }
-    })
+        );
 }
 
 function createCliente(req,res) {
-    const {nombre, cuit} = req.body
-    const query = "INSERT INTO cliente (nombre, cuit) VALUES (?,?)"
+    const nombreCliente = req.body.nombreCliente;
+    const clienteCuit = req.body.clienteCuit;
 
-    connection.query(query, [nombre, cuit], (err,result)=>{
-        if (err) {
-            console.error(err)
-            res.status(500).send("Error, couldn't insert notes")
-        } else{
-            res.json(result)
+    connection.query('INSERT INTO cliente(nombreCliente,clienteCuit) VALUES(?,?)',[nombreCliente, clienteCuit],
+    (err,result)=>{
+        if(err){
+            console.log(err);
+        }else{
+            res.send(result);
         }
-    })
+    }
+    );
 }
 
 function updateCliente(req,res) {
-    const clienteId = req.params.id
-    const {nombre, cuit} = req.body
-    const query = "UPDATE cliente SET title=?, content=? WHERE id=?"
+    const id = req.body.id;
+    const nombreCliente = req.body.nombreCliente;
+    const clienteCuit = req.body.clienteCuit;
 
-    connection.query(query, [nombre, cuit, clienteId], (err, result) => {
-        if(err) {
-            console.error(err)
-            res.status(500).send("Error, couldn't update notes")
-        } else{
-            res.json(result)
+    connection.query('UPDATE cliente SET nombreCliente=?,clienteCuit=? WHERE id=?',[nombreCliente,clienteCuit,id],
+    (err,result)=>{
+        if(err){
+            console.log(err);
+        }else{
+            res.send(result);
         }
-    })
+    }
+    );
 }
 
 function getClienteById(req,res) {
@@ -50,7 +51,7 @@ function getClienteById(req,res) {
     connection.query(query, [clienteId], (err,result)=>{
         if (err) {
             console.error(err)
-            res.status(500),send("Error retrieving note from database")
+            res.status(500),send("Error retrieving client from database")
         }else{
             res.json(result)
         }
@@ -58,18 +59,17 @@ function getClienteById(req,res) {
 }
 
 function deleteCliente(req,res) {
-    const clienteId= req.params.id
+    const id = req.params.id;
 
-    const query= "DELETE FROM cliente WHERE id=?"
-
-    connection.query(query, [clienteId], (err, result) => {
+    connection.query('DELETE FROM cliente WHERE id=?',id,
+    (err,result)=>{
         if(err){
-            console.error(err)
-            res.statust(500).send("Error deleting notes from database")
-        }else {
-            res.json(result)
+            console.log(err);
+        }else{
+            res.send(result);
         }
-    })
+    }
+    );
 }
 
 module.exports ={

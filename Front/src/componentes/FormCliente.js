@@ -1,118 +1,209 @@
-import React, { useState, useEffect } from "react";
-import { DataTable } from "primereact/datatable";
-import { Column } from "primereact/column";
-import { clientes } from "../datos/Datos";
+import "../estilos-pagina/componentes.css";
+import { useState } from "react";
+import Axios from "axios";
+import 'bootstrap/dist/css/bootstrap.min.css';
+import Swal from 'sweetalert2'
 
-import logoProducto from "./IMG COMPONENTES/cliente-01.png";
+// import logoProducto from "./IMG COMPONENTES/cliente-01.png";
 
 function FormCliente() {
-  const [clienteList, setClienteList] = useState([]);
+  const [nombreCliente,setNombreCliente] = useState("");
+  const [clienteCuit,setClienteCuit] = useState("");
+  const [idCliente,setIdCliente] = useState();
 
-  useEffect(() => {
-    setClienteList(clientes)
-  }, [])
+  const [editar,setEditar] = useState(false);
 
-  const [inputCliente, setInputCliente] = useState({
-    id: "",
-    nombre: "",
-    cuit: "",
-  });
+  const [clienteList,setCliente] = useState([]);
 
-  const handleChangeCliente = (event) => {
-    const { name, value } = event.target;
-    setInputCliente({
-      ...inputCliente,
-      [name]: value,
+  const add = ()=>{
+    Axios.post("http://localhost:3001/cliente/create",{
+      nombreCliente:nombreCliente,
+      clienteCuit:clienteCuit
+    }).then(()=>{
+      getCliente();
+      limpiarCampos();
+      Swal.fire({
+        title: "<strong>Creación exitosa!!!</strong>",
+        html: "<i>El producto <strong>"+nombreCliente+"</strong> fue registrado con éxito!!!</i>",
+        icon: 'success',
+        timer:3000
+      })
+    }).catch(function(error){
+      Swal.fire({
+        icon: 'error',
+        title: 'Oops...',
+        text: JSON.parse(JSON.stringify(error)).message==="Network Error"?"Intente más tarde":JSON.parse(JSON.stringify(error)).message
+      })
     });
-  };
+  }
 
-  const handleSubmit = (event) => {
-    event.preventDefault();
-    setClienteList([...clienteList, inputCliente]);
-  };
+  const update = ()=>{
+    Axios.put("http://localhost:3001/cliente/update",{
+      idCliente:idCliente,
+      nombreCliente:nombreCliente,
+      clienteCuit:clienteCuit,
+    }).then(()=>{
+      getCliente();
+      limpiarCampos();
+      Swal.fire({
+        title: "<strong>Actualización exitosa!!!</strong>",
+        html: "<i>El cliente <strong>"+nombreCliente+"</strong> fue actualizado con éxito!!!</i>",
+        icon: 'success',
+        timer:3000
+      }).catch(function(error){
+        Swal.fire({
+          icon: 'error',
+          title: 'Oops...',
+          text: JSON.parse(JSON.stringify(error)).message==="Network Error"?"Intente más tarde":JSON.parse(JSON.stringify(error)).message
+        })
+      });
+    });
+  }
 
-   const eliminarCliente = (id) => {
-     const borrarCliente = clienteList.filter(
-       (inputCliente) => inputCliente.id !== id
-     );
-     setClienteList(borrarCliente);
-   };
+  const deleteCliente = (val)=>{
+
+    Swal.fire({
+      title: 'Confirmar eliminado?',
+      html: "<i>Realmente desea eliminar a <strong>"+val.nombreCliente+"</strong>?</i>",
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#d33',
+      confirmButtonText: 'Si, eliminarlo!'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        Axios.delete(`http://localhost:3001/cliente/delete/${val.idCliente}`).then((res)=>{
+          getCliente();
+          limpiarCampos();
+          Swal.fire({
+            icon: 'success',
+            title: val.nombreCliente+' fue eliminado.',
+            showConfirmButton: false,
+            timer: 2000
+          });
+        }).catch(function(error){
+          Swal.fire({
+            icon: 'error',
+            title: 'Oops...',
+            text: 'No se logró eliminar el cliente!',
+            footer: JSON.parse(JSON.stringify(error)).message==="Network Error"?"Intente más tarde":JSON.parse(JSON.stringify(error)).message
+          })
+        });
+        
+      }
+    });
+
+    
+  }
+
+  const limpiarCampos = ()=>{
+    setNombreCliente("");
+    setClienteCuit("");
+    setIdCliente("");
+    setEditar(false);
+  }
+
+    const editarCliente = (val)=>{
+      setEditar(true);
+
+      setNombreCliente(val.nombreCliente);
+      setClienteCuit(val.clienteCuit);
+      setIdCliente(val.idCliente);
+    }
+  
+
+  const getCliente = ()=>{
+    Axios.get("http://localhost:3001/cliente/clientes").then((response)=>{
+      setCliente(response.data);
+    });
+  }
+
+  getCliente();
+
+
+  
+
+
   return (
     <div className="container">
-        <div className="logo-container">
-         <img src={logoProducto} alt="Logo Producto" className="producto-logo" />
+
+    <div className="card text-center">
+      <div className="card-header">
+        GESTIÓN DE CLIENTES
+      </div>
+      <div className="card-body">
+        <div className="input-group mb-3">
+          <span className="input-group-text" id="basic-addon1">Nombre del cliente:</span>
+          <input type="text"
+          onChange={(event)=>{
+            setNombreCliente(event.target.value);
+          }}
+          className="form-control" value={nombreCliente} placeholder="Ingrese el nombre del cliente" aria-label="Username" aria-describedby="basic-addon1"/>
         </div>
-        <div className="d-flex justify-content-center align-item-center">
-        <form onSubmit={handleSubmit}>
-        <div className="row">
-          <div className="col-md-12">
-            <input
-              className="form-control"
-              type="id"
-              name="id"
-              placeholder="ID del cliente"
-              value={inputCliente.id}
-              onChange={handleChangeCliente}
-            />
-          </div>
-          <div className="col-md-12">
-            <input
-              className="form-control"
-              type="text"
-              name="nombre"
-              placeholder="Nombre del cliente"
-              value={inputCliente.nombre}
-              onChange={handleChangeCliente}
-            />
-          </div>
-          <div className="col-md-12">
-            <input
-              className="form-control"
-              type="text"
-              name="cuit"
-              placeholder="CUIT del cliente"
-              value={inputCliente.cuit}
-              onChange={handleChangeCliente}
-            />
-          </div>
-          </div>
-          <button className="boton-send" type="submit">Enviar</button>
-        </form>
-      </div>
-      <hr />
 
-      <div className="card mb-3 shadow-8 surface-card text-center border-round-sm h-100rem w-70rem font-semibold">
-        <DataTable value={clienteList} tableStyle={{ minWidth: "50rem" }} selectionMode="single"
-          onRowClick={(event) => {
-            console.log(event.data);
-            window.location.href = `/formcliente/${event.data.id}`;
-          }}>
-          <Column field="id" header="ID"></Column>
-          <Column field="nombre" header="Nombre del cliente"></Column>
-          <Column field="cuit" header="CUIT"></Column>
-        </DataTable>
-      </div>
+        <div className="input-group mb-3">
+          <span className="input-group-text" id="basic-addon1">Cuit del cliente:</span>
+          <input type="text" value={clienteCuit}
+           onChange={(event)=>{
+            setClienteCuit(event.target.value);
+          }}
+          className="form-control" placeholder="Ingrese el cuit del cliente" aria-label="Username" aria-describedby="basic-addon1"/>
+        </div>
 
-      { <div>
-        {clienteList.map((value, index) => (
-         <div className="card mb-3 shadow-8 surface-card border-round-sm h-100rem w-70rem font-semibold">
-          <div key={index} className="mt-2 ml-4">
-            <p>El ID del cliente es {value.id}</p>
-            <p>El nombre del cliente es {value.nombre}</p>
-            <p>El CUIT del cliente es {value.cuit}</p>
-            <div>
-              <button
-                type="submit"
-                className="btn btn-secondary"
-                onClick={() => eliminarCliente(value.id)}
-              >
-                Delete
-              </button>
-            </div>
+
+      </div>
+      <div className="card-footer text-muted">
+        {
+          editar? 
+          <div>
+          <button className='btn btn-warning m-2' onClick={update}>Actualizar</button> 
+          <button className='btn btn-info m-2' onClick={limpiarCampos}>Cancelar</button>
           </div>
-          </div>
-        ))}
-      </div>}
+          :<button className='btn btn-success' onClick={add}>Registrar</button>
+        }
+      
+      </div>
+    </div>
+
+    <table className="table table-striped">
+        <thead>
+        <tr>
+          <th scope="col">#</th>
+          <th scope="col">Cliente</th>
+          <th scope="col">Cuit</th>
+          <th scope="col">Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+
+      {
+          clienteList.map((val,key)=>{
+            return <tr key={val.idCliente}>
+                    <th>{val.idCliente}</th>
+                    <td>{val.nombreCliente}</td>
+                    <td>{val.clienteCuit}</td>
+                    <td>
+                    <div className="btn-group" role="group" aria-label="Basic example">
+                      <button type="button"
+                      onClick={()=>{
+                        editarCliente(val);
+                      }}
+                      className="btn btn-info">Editar</button>
+                      <button type="button" onClick={()=>{
+                        deleteCliente(val);
+                      }} className="btn btn-danger">Eliminar</button>
+                    </div>
+                    </td>
+                  </tr>
+            
+          })
+        }
+        
+        
+      </tbody>  
+    </table>
+
+
     </div>
   );
 }

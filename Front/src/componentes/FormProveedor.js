@@ -1,121 +1,209 @@
-import React, { useState, useEffect } from "react";
-import { proveedores } from "../datos/Datos";
-import { DataTable } from "primereact/datatable";
-import { Column } from "primereact/column";
+import "../estilos-pagina/componentes.css";
+import { useState } from "react";
+import Axios from "axios";
+import 'bootstrap/dist/css/bootstrap.min.css';
+import Swal from 'sweetalert2'
 
-import logoProducto from "./IMG COMPONENTES/proveedor-01.png";
+// import logoProducto from "./IMG COMPONENTES/proveedor-01.png";
 
 function FormProveedor() {
-  const [proveedorList, setProveedorList] = useState([]);
+  const [proveedorProducto,setProveedorProducto] = useState("");
+  const [proveedorCuit,setProveedorCuit] = useState("");
+  const [idProveedor,setIdProveedor] = useState();
 
-  useEffect(() => {
-    setProveedorList(proveedores)
-  }, [])
+  const [editar,setEditar] = useState(false);
 
+  const [proveedorList,setProveedor] = useState([]);
 
-  const [inputProveedor, setInputProveedor] = useState({
-    id: "",
-    nombre: "",
-    cuit: "",
-  });
-
-  const handleChangeProveedor = (event) => {
-    const { name, value } = event.target;
-    setInputProveedor({
-      ...inputProveedor,
-      [name]: value,
+  const add = ()=>{
+    Axios.post("http://localhost:3001/proveedor/create",{
+      proveedorProducto:proveedorProducto,
+      proveedorCuit:proveedorCuit
+    }).then(()=>{
+      getProveedor();
+      limpiarCampos();
+      Swal.fire({
+        title: "<strong>Creación exitosa!!!</strong>",
+        html: "<i>El producto <strong>"+proveedorProducto+"</strong> fue registrado con éxito!!!</i>",
+        icon: 'success',
+        timer:3000
+      })
+    }).catch(function(error){
+      Swal.fire({
+        icon: 'error',
+        title: 'Oops...',
+        text: JSON.parse(JSON.stringify(error)).message==="Network Error"?"Intente más tarde":JSON.parse(JSON.stringify(error)).message
+      })
     });
-  };
+  }
 
-  const handleSubmit = (event) => {
-    event.preventDefault();
-    setProveedorList([...proveedorList, inputProveedor]);
-  };
+  const update = ()=>{
+    Axios.put("http://localhost:3001/proveedor/update",{
+      idProveedor:idProveedor,
+      proveedorProducto:proveedorProducto,
+      proveedorCuit:proveedorCuit,
+    }).then(()=>{
+      getProveedor();
+      limpiarCampos();
+      Swal.fire({
+        title: "<strong>Actualización exitosa!!!</strong>",
+        html: "<i>El producto <strong>"+proveedorProducto+"</strong> fue actualizado con éxito!!!</i>",
+        icon: 'success',
+        timer:3000
+      }).catch(function(error){
+        Swal.fire({
+          icon: 'error',
+          title: 'Oops...',
+          text: JSON.parse(JSON.stringify(error)).message==="Network Error"?"Intente más tarde":JSON.parse(JSON.stringify(error)).message
+        })
+      });
+    });
+  }
 
-   const eliminarProducto = (id) => {
-     const tareasActualizadas = proveedorList.filter(
-       (inputProveedor) => inputProveedor.id !== id
-     );
-     setProveedorList(tareasActualizadas);
-   };
+  const deleteProveedor = (val)=>{
+
+    Swal.fire({
+      title: 'Confirmar eliminado?',
+      html: "<i>Realmente desea eliminar a <strong>"+val.proveedorProducto+"</strong>?</i>",
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#d33',
+      confirmButtonText: 'Si, eliminarlo!'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        Axios.delete(`http://localhost:3001/proveedor/delete/${val.idProveedor}`).then((res)=>{
+          getProveedor();
+          limpiarCampos();
+          Swal.fire({
+            icon: 'success',
+            title: val.proveedorProducto+' fue eliminado.',
+            showConfirmButton: false,
+            timer: 2000
+          });
+        }).catch(function(error){
+          Swal.fire({
+            icon: 'error',
+            title: 'Oops...',
+            text: 'No se logró eliminar el proveedor!',
+            footer: JSON.parse(JSON.stringify(error)).message==="Network Error"?"Intente más tarde":JSON.parse(JSON.stringify(error)).message
+          })
+        });
+        
+      }
+    });
+
+    
+  }
+
+  const limpiarCampos = ()=>{
+    setProveedorProducto("");
+    setProveedorCuit("");
+    setIdProveedor("");
+    setEditar(false);
+  }
+
+    const editarProveedor = (val)=>{
+      setEditar(true);
+
+      setProveedorProducto(val.proveedorProducto);
+      setProveedorCuit(val.proveedorCuit);
+      setIdProveedor(val.idProveedor);
+    }
+  
+
+  const getProveedor = ()=>{
+    Axios.get("http://localhost:3001/proveedor/proveedores").then((response)=>{
+      setProveedor(response.data);
+    });
+  }
+
+  getProveedor();
+
+
+  
+
 
   return (
     <div className="container">
-    <div className="logo-container">
-      <img src={logoProducto} alt="Logo Producto" className="producto-logo" />
-    </div>
 
-    <div className="d-flex justify-content-center align-item-center">
-      <form onSubmit={handleSubmit}>
-      <div className="row">
-        <div className="col-md-12">
-          <input
-            className="form-control"
-            type="id"
-            name="id"
-            placeholder="ID del proveedor"
-            value={inputProveedor.id}
-            onChange={handleChangeProveedor}
-          />
-        </div>
-        <div className="col-md-12">
-          <input
-            className="form-control"
-            type="text"
-            name="nombre"
-            placeholder="Nombre del proveedor"
-            value={inputProveedor.nombre}
-            onChange={handleChangeProveedor}
-          />
-        </div>
-        <div className="col-md-12">
-          <input
-            className="form-control"
-            type="text"
-            name="cuit"
-            placeholder="CUIT del proveedor"
-            value={inputProveedor.cuit}
-            onChange={handleChangeProveedor}
-          />
-        </div>
-        </div>
-        <button className="boton-send" type="submit">Enviar</button>
-      </form>
-    </div>
-      <hr />
-
-      <div className="card mb-3 shadow-8 surface-card border-round-sm h-100rem w-70rem font-semibold">
-        <DataTable value={proveedorList} tableStyle={{ minWidth: "50rem" }} selectionMode="single"
-          onRowClick={(event) => {
-            console.log(event.data);
-            window.location.href = `/formproveedor/${event.data.id}`;
-          }}>
-          <Column field="id" header="ID"></Column>
-          <Column field="nombre" header="Nombre"></Column>
-          <Column field="cuit" header="CUIT"></Column>
-        </DataTable>
+    <div className="card text-center">
+      <div className="card-header">
+        GESTIÓN DE PROVEEDORES
       </div>
+      <div className="card-body">
+        <div className="input-group mb-3">
+          <span className="input-group-text" id="basic-addon1">Nombre del proveedor:</span>
+          <input type="text"
+          onChange={(event)=>{
+            setProveedorProducto(event.target.value);
+          }}
+          className="form-control" value={proveedorProducto} placeholder="Ingrese el nombre del proveedor" aria-label="Username" aria-describedby="basic-addon1"/>
+        </div>
 
-      { <div>
-        {proveedorList.map((value, index) => (
-          <div className="card mb-3 shadow-8 surface-card border-round-sm h-100rem w-70rem font-semibold">
-          <div key={index} className="mg-4">
-            <p>El ID del proveedor es {value.id}</p>
-            <p>El nombre del proveedor es {value.nombre}</p>
-            <p>El CUIT del proveedor es {value.cuit}</p>
-            </div>
-            <div>
-              <button
-                type="submit"
-                className="btn btn-secondary"
-                onClick={() => eliminarProducto(value.id)}
-              >
-                Delete
-              </button>
-            </div>
+        <div className="input-group mb-3">
+          <span className="input-group-text" id="basic-addon1">Cuit del proveedor:</span>
+          <input type="text" value={proveedorCuit}
+           onChange={(event)=>{
+            setProveedorCuit(event.target.value);
+          }}
+          className="form-control" placeholder="Ingrese el cuit del proveedor" aria-label="Username" aria-describedby="basic-addon1"/>
+        </div>
+
+
+      </div>
+      <div className="card-footer text-muted">
+        {
+          editar? 
+          <div>
+          <button className='btn btn-warning m-2' onClick={update}>Actualizar</button> 
+          <button className='btn btn-info m-2' onClick={limpiarCampos}>Cancelar</button>
           </div>
-        ))}
-      </div> }
+          :<button className='btn btn-success' onClick={add}>Registrar</button>
+        }
+      
+      </div>
+    </div>
+
+    <table className="table table-striped">
+        <thead>
+        <tr>
+          <th scope="col">#</th>
+          <th scope="col">Proveedor</th>
+          <th scope="col">Cuit</th>
+          <th scope="col">Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+
+      {
+          proveedorList.map((val,key)=>{
+            return <tr key={val.idProveedor}>
+                    <th>{val.idProveedor}</th>
+                    <td>{val.proveedorProducto}</td>
+                    <td>{val.proveedorCuit}</td>
+                    <td>
+                    <div className="btn-group" role="group" aria-label="Basic example">
+                      <button type="button"
+                      onClick={()=>{
+                        editarProveedor(val);
+                      }}
+                      className="btn btn-info">Editar</button>
+                      <button type="button" onClick={()=>{
+                        deleteProveedor(val);
+                      }} className="btn btn-danger">Eliminar</button>
+                    </div>
+                    </td>
+                  </tr>
+            
+          })
+        }
+        
+        
+      </tbody>  
+    </table>
+
+
     </div>
   );
 }

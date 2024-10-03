@@ -7,7 +7,7 @@ export const Usuarios = () => {
 
     useEffect(() => {
         axios.get('http://localhost:3001/usuario', {headers: {Authorization: `Bearer ${localStorage.getItem('firebaseToken')}`}}).then(response => {
-            setUsers(response.data.usuarios)
+            setUsers(response.data.usuario)
         }).catch(error => {
             console.error(error)
         })

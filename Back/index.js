@@ -1,31 +1,25 @@
 const express = require('express');
-const cors = require('express');
+const cors = require('cors');
 
 require('dotenv').config()
 
 const app = express();
 
-app.use(cors())
+app.use(cors());
+app.use(express.json());
 
 //PARA PODER PROCESAR JSON
 //app.use(express.JSON());
 app.use(express.json());
 
-//LLAMAR A LA RUTAS
-const proveedorroutes = require('./routes/proveedorRoute');
-const clienteroutes = require('./routes/clienteRoute');
-const productoroutes = require('./routes/productoRoute');
-const pedidoroutes = require('./routes/pedidoRoute');
-
-
 // const PORT = process.env.PORT || 3000;
 
 app.use('/usuario', require('./routes/usuarioRoute'))
 app.use('/auth', require('./routes/authRoute'))
-app.use('/api/proveedor',proveedorroutes)
-app.use('/api/cliente',clienteroutes)
-app.use('/api/producto',productoroutes)
-app.use('/api/pedido',pedidoroutes)
+app.use('/producto', require('./routes/productoRoute'))
+app.use('/proveedor', require('./routes/proveedorRoute'))
+app.use('/cliente', require('./routes/clienteRoute'))
+app.use('/pedido', require('./routes/pedidoRoute'))
 
 var admin = require("firebase-admin");
 
